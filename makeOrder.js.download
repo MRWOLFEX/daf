@@ -1,0 +1,50 @@
+$(".orderForm").on("submit", function(event) {
+
+    event.preventDefault();
+
+    var name = $(".orderForm #name");
+    var phone = $(".orderForm #phone");
+    var address = $(".orderForm #address");
+
+    if (name.val() == "") {
+        $(".errorContainer").html("برجاء ادخال الاسم");
+    } else if (phone.val() == "") {
+        $(".errorContainer").html("برجاء ادخال رقم الهاتف");
+    } else if (address.val() == "") {
+        $(".errorContainer").html("برجاء ادخال العنوان");
+    } else if (phone.val().length > 15) {
+        $(".errorContainer").html("رقم الهاتف لا يمكن ان يكون اكثر من 15 رقم");
+    } else {
+        $(".errorContainer").html("");
+        $.ajax({
+
+            type: "POST",
+            url: "orderForm/send.php",
+            data: {name: name.val(), phone: phone.val(), address: address.val()},
+            beforeSend: function() {
+                name.attr("readonly", "readonly");
+                phone.attr("readonly", "readonly");
+                address.attr("readonly", "readonly");
+                $(".orderForm .orderButton").attr("disabled", "disabled");
+                $(".orderForm .orderButton").html("جاري ارسال بياناتك ...");
+            },
+            success: function(response) {
+                console.log(response);
+                if (response == 500) {
+                    $(".errorContainer").html("لقد ادخلت بياناتك من قبل لا داعي لأدخالها مرة اخرى");
+                } else if (response == 200) {
+                    window.location.replace("thanks.php");
+                }
+            },
+            complete: function() {
+                name.removeAttr("readonly", "readonly");
+                phone.removeAttr("readonly", "readonly");
+                address.removeAttr("readonly", "readonly");
+                $(".orderForm .orderButton").removeAttr("disabled", "disabled");
+                $(".orderForm .orderButton").html("اطلب الان");
+            }
+
+        });
+    }
+
+});
